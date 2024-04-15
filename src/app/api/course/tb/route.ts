@@ -164,6 +164,7 @@ export async function PUT(request: NextRequest){
                 time_blocks: course_tb.time_blocks.map((tb) => {
                     return {
                         id: tb.id,
+                        day_of_week: tb.day_of_week,
                         week_start: tb.week_start,
                         week_end: tb.week_end,
                         start: tb.start,

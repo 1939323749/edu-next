@@ -67,16 +67,17 @@ model Student {
 }
 
 model Course {
-  id          Int       @id @default(autoincrement())
+  id          Int         @id @default(autoincrement())
   name        String
   description String?
-  credit      Float     @default(0)
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  credit      Float       @default(0)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
   students    Student[]
   teachers    Teacher[]
   classes     Class[]
   time_blocks TimeBlock[]
+  locations   Location[]
 }
 
 model Teacher {
@@ -101,12 +102,22 @@ model Class {
 }
 
 model TimeBlock {
+  id          Int      @id @default(autoincrement())
+  week_start  Int
+  week_end    Int
+  day_of_week Int      @default(1)
+  start       Int
+  end         Int
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  course      Course[]
+}
+
+model Location {
   id        Int      @id @default(autoincrement())
-  week_start Int
-  week_end   Int
-  start     Int
-  end       Int
+  name      String
+  address   String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  course    Course[]
+  courses   Course[]
 }

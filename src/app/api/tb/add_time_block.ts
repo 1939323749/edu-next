@@ -1,0 +1,50 @@
+import prisma from "@/app/db";
+import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
+
+export async function POST(req: NextRequest) {
+    var data:{
+        week_start: number;
+        week_end: number;
+        start : number;
+        end : number;
+        day_of_week: number;
+    }
+    try {
+        data = await req.json();
+    } catch (error) {
+        return NextResponse.json({
+            msg: "error",
+            error: "invalid json format",
+        });
+    }
+    try {
+        z.object({
+            week_start: z.number(),
+            week_end: z.number(),
+            start: z.number(),
+            end: z.number(),
+            day_of_week: z.number(),
+        }).parse(data);
+        const tb = await prisma.timeBlock.create({
+            data: {
+                week_start: data.week_start,
+                week_end: data.week_end,
+                start: data.start,
+                end: data.end,
+                day_of_week: data.day_of_week,
+            }
+        });
+        return NextResponse.json({
+            msg: "success",
+            data: tb,
+        });
+    } catch (error) {
+        return NextResponse.json({
+            msg: "error",
+            error: error,
+        }, {
+            status: 500,
+        });
+    }
+}

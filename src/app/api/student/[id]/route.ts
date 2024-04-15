@@ -38,6 +38,22 @@ export async function GET(
 					select: {
                         id: true,
 						name: true,
+						locations: {
+							select: {
+								id: true,
+								name: true,
+								address: true,
+							},
+						},
+						time_blocks: {
+							select: {
+								id: true,
+								start: true,
+								end: true,
+								week_start: true,
+								week_end: true,
+							},
+						},
 					},
 				},
 			},
