@@ -3,18 +3,6 @@ import { encryptPassword } from "@/util";
 import { NextRequest } from "next/server";
 import { z } from "zod";
 
-export async function GET(req: NextRequest) {
-	return Response.json(
-		{
-			msg: "error",
-			error: "method not allowed",
-		},
-		{
-			status: 405,
-		}
-	);
-}
-
 export async function POST(req: NextRequest) {
 	var data: {
 		account: string;
