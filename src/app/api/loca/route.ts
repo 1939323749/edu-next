@@ -2,6 +2,48 @@ import prisma from "@/app/db";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
+/**
+ * @sawgger
+ * /api/loca:
+ *  post:
+ *   description: 添加教室
+ *  requestBody:
+ *   content:
+ *    application/json:
+ *     schema:
+ *      type: object
+ *      properties:
+ *       name:
+ *        type: string
+ *        description: 教室名称
+ *        example: 101
+ *       address:
+ *        type: string
+ *        description: 教室地址
+ *        example: 1号楼
+ *  responses:
+ *   200:
+ *    description: Success
+ *    content:
+ *     application/json:
+ *      schema:
+ *       type: object
+ *       properties:
+ *        msg:
+ *         type: string
+ *         example: success
+ *        data:
+ *         type: object
+ *         properties:
+ *          id:
+ *           type: number
+ *          name:
+ *           type: string
+ *          address:
+ *           type: string
+ *   400:
+ *    description: Invalid data
+ */
 export async function POST(req: NextRequest) {
     var data:{
         name: string;

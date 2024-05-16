@@ -1,7 +1,27 @@
 import prisma from "@/app/db";
 import { NextRequest } from "next/server";
 import { set } from "zod";
-
+/**
+ * @swagger
+ * /api/class/addCourse:
+ *  post:
+ *   description: 为班级添加课程
+ *   requestBody:
+ *    content:
+ *     application/json:
+ *      schema:
+ *       type: object
+ *       properties:
+ *        class_id:
+ *         type: number
+ *        course_id:
+ *         type: number
+ *   responses:
+ *    200:
+ *     description: Success
+ *    400:
+ *     description: Invalid data
+ */
 export async function POST(request: NextRequest) {
     var data: {
         class_id: number;

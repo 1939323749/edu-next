@@ -7,93 +7,14 @@ export async function GET(req: NextRequest) {
 		msg: "success",
 		data: await prisma.course.findMany({
             select: {   
+                id: true,
                 name: true,
                 description: true,
-                students: {
-                    select: {
-                        name: true,
-                    }
-                },
-                teachers: {
-                    select: {
-                        name: true,
-                    }
-                },
-                classes: {
-                    select: {
-                        name: true,
-                        students: {
-                            select: {
-                                id: true,
-                                name: true,
-                            }
-                        }
-                    }
-                },
-                locations: {
-                    select: {
-                        id: true,
-                        name: true,
-                        address: true,
-                    }
-                },
-                time_blocks: {
-                    select: {
-                        id: true,
-                        start: true,
-                        end: true,
-                        week_start: true,
-                        week_end: true,
-                    }
-                }
             }
         }),
 	});
 }
 
-export async function POST(req: NextRequest) {
-	var data: {
-		name: string;
-		description: string | undefined;
-        credit: number | undefined;
-	};
-	try {
-		data = await req.json();
-	} catch (error) {
-		return Response.json({
-			msg: "error",
-			error: "invalid json format",
-		});
-	}
-	try {
-		z.object({
-			name: z.string(),
-			description: z.string().optional(),
-		}).parse(data);
-		const course = await prisma.course.create({
-			data: {
-				name: data.name,
-				description: data.description,
-                credit: data.credit,
-			},
-		});
-		return Response.json({
-			msg: "success",
-            data: "course created",
-            course: {
-                id: course.id,
-                name: course.name,
-                description: course.description,
-                credit: course.credit,
-            },
-		});
-	} catch (error) {
-		return Response.json({
-			msg: "error",
-			error: "invalid data",
-		});
-	}
-}
 
 export async function PUT(req: NextRequest) {
     var data: {
@@ -144,3 +65,4 @@ export async function PUT(req: NextRequest) {
     }
 }
 
+export { addCourse as POST } from './add_course'

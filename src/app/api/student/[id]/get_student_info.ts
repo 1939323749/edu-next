@@ -1,4 +1,5 @@
 import prisma from "@/app/db";
+import email from "next-auth/providers/email";
 import { NextRequest } from "next/server";
 
 export async function GET(
@@ -21,54 +22,28 @@ export async function GET(
 				name: true,
 				sex: true,
 				email: true,
-                class: {
-                    select: {
-                        id: true,
-                        name: true,
-                        courses: {
-                            select: {
-                                id: true,
-                                name: true,
-                            },
-                        },
-                    }
-                },
-				courses: {
+				class: {
 					select: {
-                        id: true,
 						name: true,
-						locations: {
+					},
+				},
+				enrolled_time: true,
+				graduated_time: true,
+				major: {
+					select: {
+						name: true,
+						departments: {
 							select: {
-								id: true,
 								name: true,
-								address: true,
-							},
-						},
-						time_blocks: {
-							select: {
-								id: true,
-								start: true,
-								end: true,
-								week_start: true,
-								week_end: true,
 							},
 						},
 					},
 				},
-			},
+			}
 		});
 		return Response.json({
 			msg: "success",
-			data: {
-                id: student.id,
-                name: student.name,
-                calss_name: student.class.name,
-                courses: {
-                    class_courses: student.class.courses,
-                    optional_courses: student.courses,
-                },
-                selected_courses: student.courses,
-            },
+			data: student,
 		});
 	} catch (error) {
 		return Response.json({

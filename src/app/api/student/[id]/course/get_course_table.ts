@@ -21,19 +21,21 @@ export async function GET(
                 name: true,
                 courses: {
                     select: {
+                        id: true,
                         name: true,
-                        locations: {
-                            select: {
-                                name: true,
-                                address: true,
-                            },
-                        },
                         time_blocks: {
                             select: {
-                                start: true,
-                                end: true,
                                 week_start: true,
                                 week_end: true,
+                                day_of_week: true,
+                                start: true,
+                                end: true,
+                                location: {
+                                    select: {
+                                        name: true,
+                                        address: true,
+                                    },
+                                }
                             },
                         },
                     },

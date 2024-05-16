@@ -1,7 +1,39 @@
 import prisma from "@/app/db";
+import { error } from "console";
 import { NextRequest } from "next/server";
 import { z } from "zod";
 
+/**
+ * @swagger
+ * /api/classroom:
+ *  post:
+ *   description: 获取某一时间段内可用的教室
+ *   requestBody:
+ *    content:
+ *     application/json:
+ *      schema:
+ *       type: object
+ *       properties:
+ *        week:
+ *         type: number
+ *         description: 周次
+ *         example: 1
+ *        day_of_week:
+ *         type: number
+ *         description: 星期几
+ *         example: 1
+ *        start:
+ *         type: number
+ *         description: 第几节课开始
+ *         example: 1
+ *        end:
+ *         type: number
+ *         description: 第几节课结束
+ *         example: 2
+ *   responses:
+ *    200:
+ *     description: Success
+ */
 export async function POST(req: NextRequest) {
 	var data: {
 		week: number;
@@ -27,47 +59,36 @@ export async function POST(req: NextRequest) {
 			end: z.number(),
 		}).parse(data);
 
-		const courses = await prisma.course.findMany({
+		const available = await prisma.location.findMany({
 			where: {
-				time_blocks: {
-					some: {
-						AND: {
-							week_start: {
-								lte: data.week,
-							},
-							week_end: {
-								gte: data.week,
-							},
-							day_of_week: data.day_of_week,
-							start: {
-								lte: data.start,
-							},
-							end: {
-								gte: data.end,
+				NOT: {
+					timeBlock: {
+						some: {
+							AND: {
+								week_end: {
+									gte: data.week,
+								},
+								week_start: {
+									lte: data.week,
+								},
+								day_of_week: {
+									equals: data.day_of_week,
+								},
+								start: {
+									lte: data.start,
+								},
+								end: {
+									gte: data.end,
+								},
 							},
 						},
 					},
 				},
 			},
 			include: {
-                time_blocks: true,
-                locations: true,
-            },
+				timeBlock: true,
+			},
 		});
-
-        const available = await prisma.location.findMany({
-            where: {
-                NOT: {
-                    courses: {
-                        some: {
-                            id: {
-                                in: courses.map((course) => course.id),
-                            },
-                        },
-                    },
-                },
-            },
-        });
 		return Response.json({
 			msg: "success",
 			data: available.map((location) => {

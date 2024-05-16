@@ -6,30 +6,40 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
 export async function GET(req: NextRequest) {
-  try {
-    await redis.connect();
-    const userId = await redis.get(req.headers.get("cookie")!!.split("=")[1]);
-    await redis.disconnect();
-    if (userId) {
-      return NextResponse.next();
-    }
-    return NextResponse.redirect(new URL("/api/login", req.url),{
-      status: 401,
-      headers: {
-        "Set-Cookie": `token=${randomUUID()}; Max-Age=60;`,
-      },
-    });
-  } catch (error) {
-    return Response.json(
-      {
-        msg: "error",
-        error: error,
-      },
-      {
-        status: 500,
-      }
-    );
-  }
+//   try {
+//     await redis.connect();
+//     const userId = await redis.get(req.headers.get("cookie")!!.split("=")[1]);
+//     await redis.disconnect();
+//     if (userId) {
+//       return NextResponse.next();
+//     }
+//     return NextResponse.redirect(new URL("/api/login", req.url),{
+//       status: 401,
+//       headers: {
+//         "Set-Cookie": `token=${randomUUID()}; Max-Age=60;`,
+//       },
+//     });
+//   } catch (error) {
+//     return Response.json(
+//       {
+//         msg: "error",
+//         error: error,
+//       },
+//       {
+//         status: 500,
+//       }
+//     );
+//   }
+console.log(req.headers.get("x-redirect-referrer"));
+const response = NextResponse.json({
+	msg: "success",
+	data: "login success",
+});
+response.cookies.set("token", randomUUID(), {
+	httpOnly: true,
+	maxAge: 60,
+});
+return response;
 }
 
 export async function POST(req: NextRequest) {
