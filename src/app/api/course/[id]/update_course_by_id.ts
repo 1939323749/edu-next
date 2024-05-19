@@ -35,82 +35,140 @@ export async function PUT(
 	req: NextRequest,
 	{ params }: { params: { id: string } }
 ) {
-    try {
-        if (!Number(params.id)) {
-            return Response.json({
-                msg: "error",
-                error: "invalid id",
-            });
-        }
-    } catch (error) {
-        return Response.json({
-            msg: "error",
-            error: "invalid id",
-        });
-    }
+	try {
+		if (!Number(params.id)) {
+			return Response.json({
+				msg: "error",
+				error: "invalid id",
+			});
+		}
+	} catch (error) {
+		return Response.json({
+			msg: "error",
+			error: "invalid id",
+		});
+	}
 
-    var data: {
-        name: string | undefined,
-        credit: number | undefined,
-        description: string | undefined,
-        location: {
-            loca_id: number,
-            time_block_id: number,
-        } | undefined,
-    }
-    try {
-        data = await req.json()
-    } catch (error) {
-        return Response.json({
-            msg: "error",
-            error: "invalid data",
-        });
-    }
-    try {
-        z.object({
-            name: z.string().optional(),
-            credit: z.number().optional(),
-            description: z.string().optional(),
-            location: z.object({
-                loca_id: z.number(),
-                time_block_id: z.number(),
-            }).optional(),
-        }).parse(data)    
-        
-        if (data.location !== undefined) {
-            const existed_course = await prisma.location.findFirst({
-                where: {
-                    AND: {
-                        id: data.location.loca_id,
-                        timeBlock: {
-                            some: {
-                                id: data.location.time_block_id,
+	var data: {
+		name: string | undefined;
+		credit: number | undefined;
+		description: string | undefined;
+		location:
+			| {
+					loca_id: number;
+					time_block_id: number;
+			  }
+			| undefined;
+	};
+	try {
+		data = await req.json();
+	} catch (error) {
+		return Response.json({
+			msg: "error",
+			error: "invalid data",
+		});
+	}
+	try {
+		z.object({
+			name: z.string().optional(),
+			credit: z.number().optional(),
+			description: z.string().optional(),
+			location: z
+				.object({
+					loca_id: z.number(),
+					time_block_id: z.number(),
+				})
+				.optional(),
+		}).parse(data);
+
+		try {
+			await prisma.course.findUnique({
+				where: {
+					id: Number(params.id),
+				},
+			});
+		} catch (error) {
+			return Response.json({
+				msg: "error",
+				error: "course not found",
+			});
+		}
+
+		if (data.location !== undefined) {
+			const existed_course = await prisma.location.findFirst({
+				where: {
+					AND: {
+						id: data.location.loca_id,
+						timeBlock: {
+							some: {
+								id: data.location.time_block_id,
+							},
+						},
+					},
+				},
+			});
+			if (existed_course) {
+				return Response.json({
+					msg: "error",
+					error: "time not available",
+				});
+			}
+		}
+
+		if (data.location) {
+			try {
+                const tb = await prisma.timeBlock.findFirst({
+                    where: {
+                        id: data.location.time_block_id,
+                    },
+                });
+
+				await prisma.location.update({
+					where: {
+						id: data.location?.loca_id,
+					},
+					data: {
+						timeBlock: {
+							connect: {
+								id: data.location?.time_block_id,
+							},
+						},
+					},
+				});
+                const updatedData = await prisma.course
+                .update({
+                    where: {
+                        id: Number(params.id),
+                    },
+                    data: {
+                        name: data.name,
+                        credit: data.credit,
+                        description: data.description,
+                        time_blocks: {
+                            connect: {
+                                id: data.location?.time_block_id,
                             },
                         },
                     },
-                },
-            })
-            if (existed_course) {
-                return Response.json({
-                    msg: "error",
-                    error: "time not available"
+                })
+                .then((data) => {
+                    return {
+                        name: data.name,
+                        credit: data.credit,
+                        description: data.description,
+                    };
                 });
-            }
-        }
-
-        await prisma.location.update({
-            where: {
-                id: data.location?.loca_id,
-            },
-            data: {
-                timeBlock: {
-                    connect: {
-                        id: data.location?.time_block_id,
-                    },
-                },
-            },
-        })
-
+            return Response.json({
+                msg: "success",
+                data: updatedData,
+            });
+			} catch (error) {
+				return Response.json({
+					msg: "error",
+					error: "location not found",
+				});
+			}
+		}
         const updatedData = await prisma.course.update({
             where: {
                 id: Number(params.id),
@@ -119,27 +177,18 @@ export async function PUT(
                 name: data.name,
                 credit: data.credit,
                 description: data.description,
-                time_blocks: {
-                    connect: {
-                        id: data.location?.time_block_id,
-                    },
-                },
             },
-        }).then((data) => {
-            return {
-                name: data.name,
-                credit: data.credit,
-                description: data.description,
-            }
         })
+
         return Response.json({
             msg: "success",
             data: updatedData,
         });
-    } catch (error) {
-        return Response.json({
-            msg: "error",
-            error: "invalid data",
-        });
-    }
+
+	} catch (error) {
+		return Response.json({
+			msg: "error",
+			error: error,
+		});
+	}
 }

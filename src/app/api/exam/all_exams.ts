@@ -12,8 +12,24 @@ import { NextRequest } from "next/server";
  */
 export async function GET(req: NextRequest){
     const data = await prisma.exam.findMany({
-        include: {
-            course: true,
+        select: {
+            id: true,
+            name: true,
+            description: true,
+            start: true,
+            end: true,
+            course: {
+                select: {
+                    id: true,
+                    name: true,
+                }
+            },
+            location: {
+                select: {
+                    id: true,
+                    name: true,
+                }
+            }
         }
     })
     return Response.json({
@@ -26,12 +42,8 @@ export async function GET(req: NextRequest){
                     description: exam.description,
                     start: exam.start,
                     end: exam.end,
-                    course: exam.course.map((course) => {
-                        return {
-                            id: course.id,
-                            name: course.name,
-                        }
-                    })
+                    course: exam.course,
+                    location: exam.location,
                 }
             })
         },

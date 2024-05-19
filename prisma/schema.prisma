@@ -81,6 +81,7 @@ model Course {
   classes      Class[]
   time_blocks  TimeBlock[]
   exams        Exam[]
+  majors       Major[]
   department   Department  @relation(fields: [departmentId], references: [id])
   departmentId Int         @default(0)
 }
@@ -141,7 +142,7 @@ model Exam {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   course      Course[]
-  Score       Score[]
+  score       Score[]
 }
 
 model Score {
@@ -163,6 +164,7 @@ model Major {
   updatedAt   DateTime     @updatedAt
   departments Department[]
   students    Student[]
+  course      Course[]
 }
 
 model Department {
@@ -174,4 +176,12 @@ model Department {
   majors      Major[]
   courses     Course[]
   teachers    Teacher[]
+}
+
+model Notice {
+  id        Int      @id @default(autoincrement())
+  title     String
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

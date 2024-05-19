@@ -1,0 +1,1 @@
+export { getStudentCourse as GET } from './get_course_by_student'

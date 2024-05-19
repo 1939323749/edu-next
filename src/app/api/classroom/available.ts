@@ -59,6 +59,13 @@ export async function POST(req: NextRequest) {
 			end: z.number(),
 		}).parse(data);
 
+		if (data.start >= data.end) {
+			return Response.json({
+				msg: "error",
+				error: "invalid time",
+			});
+		}
+
 		const available = await prisma.location.findMany({
 			where: {
 				NOT: {
@@ -75,10 +82,12 @@ export async function POST(req: NextRequest) {
 									equals: data.day_of_week,
 								},
 								start: {
-									lte: data.start,
+									gte: data.start,
+									lte: data.end,
 								},
 								end: {
-									gte: data.end,
+									lte: data.end,
+									gte: data.start,
 								},
 							},
 						},
@@ -92,11 +101,11 @@ export async function POST(req: NextRequest) {
 		return Response.json({
 			msg: "success",
 			data: available.map((location) => {
-                return {
-                    name: location.name,
-                    address: location.address,
-                }
-            })
+				return {
+					name: location.name,
+					address: location.address,
+				};
+			}),
 		});
 	} catch (error) {
 		return Response.json({

@@ -10,6 +10,7 @@ export async function addCourse(
         description: string | undefined,
         credit: number,
         department: string,
+        major: string | undefined,
     }
 
     try {
@@ -27,6 +28,7 @@ export async function addCourse(
             description: z.string().optional(),
             credit: z.number(),
             department: z.string(),
+            major: z.string().optional(),
         }).parse(data);
 
         const existed_course = await prisma.course.findFirst({
@@ -42,6 +44,19 @@ export async function addCourse(
             return Response.json({
                 msg: "error",
                 error: "course already exists",
+            });
+        }
+
+        const existed_major = await prisma.major.findFirst({
+            where: {
+                name: data.major,
+            },
+        });
+
+        if (data.major && !existed_major) {
+            return Response.json({
+                msg: "error",
+                error: "major not found",
             });
         }
 
@@ -63,9 +78,15 @@ export async function addCourse(
                         }).then((res) => res.id)
                         ),
                     },
-                }
+                },
+                majors: {
+                    connect: {
+                        id: existed_major?.id,
+                    },
+                },
             },
         });
+
 
         return Response.json({
             msg: "success",

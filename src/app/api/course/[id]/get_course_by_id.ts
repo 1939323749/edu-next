@@ -47,6 +47,12 @@ export async function GET(
                     select: {
                         id: true,
                         name: true,
+                        major: {
+                            select: {
+                                id: true,
+                                name: true,
+                            },
+                        },
                     },
                 },
                 teachers: {
@@ -69,6 +75,12 @@ export async function GET(
                                 address: true,
                             },
                         },
+                    },
+                },
+                department: {
+                    select: {
+                        id: true,
+                        name: true,
                     },
                 },
             },

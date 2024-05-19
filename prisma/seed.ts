@@ -184,6 +184,33 @@ async function main() {
 		},
 	});
 
+	// 创建课程3
+	await prisma.course.create({
+		data: {
+			name: "course3",
+			description: "course3 description",
+			credit: 3,
+			departmentId:
+				(await prisma.department
+					.findFirst({
+						where: {
+							name: "department1",
+						},
+						select: {
+							id: true,
+						},
+					})
+					.then((data) => data?.id)) ??
+				(await prisma.department
+					.create({
+						data: {
+							name: "department1",
+						},
+					})
+					.then((data) => data.id)),
+		},
+	});
+
 	// 创建老师1
 	await prisma.teacher.create({
 		data: {
@@ -432,7 +459,13 @@ async function main() {
 		},
 	});
 
-    
+	// 创建通知1
+    await prisma.notice.create({
+		data: {
+			title: "notice1",
+			content: "notice1 content",
+		},
+	});
 }
 
 main()

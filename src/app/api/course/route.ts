@@ -10,6 +10,12 @@ export async function GET(req: NextRequest) {
                 id: true,
                 name: true,
                 description: true,
+                department: {
+                    select: {
+                        id: true,
+                        name: true,
+                    },
+                },
             }
         }),
 	});
@@ -36,6 +42,19 @@ export async function PUT(req: NextRequest) {
             name: z.string().optional(),
             description: z.string().optional(),
         }).parse(data);
+
+        try {
+            await prisma.course.findUnique({
+                where: {
+                    id: data.id,
+                },
+            });
+        } catch (error) {
+            return Response.json({
+                msg: "error",
+                error: "course not found",
+            });
+        }
         await prisma.course.update({
             where: {
                 id: data.id,
@@ -60,7 +79,7 @@ export async function PUT(req: NextRequest) {
     } catch (error) {
         return Response.json({
             msg: "error",
-            error: "invalid data",
+            error: error
         });
     }
 }

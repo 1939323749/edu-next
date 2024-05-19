@@ -1,3 +1,4 @@
+import ScoreGradeMap from "@/app/config/score_grade_map";
 import prisma from "@/app/db";
 import { NextRequest } from "next/server";
 
@@ -33,12 +34,18 @@ export async function GET(
                 exam: {
                     select: {
                         name: true,
-                        description: true,
-                        start: true,
-                        end: true,
                     },
                 },
             },
+        }).then((data) => {
+            return data.map((score) => {
+                return {
+                    id: score.id,
+                    score: score.score,
+                    exam: score.exam,
+                    grade: ScoreGradeMap(score.score),
+                };
+            });
         }),
     });
 }

@@ -1,9 +1,9 @@
 import prisma from "@/app/db";
 import { NextRequest } from "next/server";
 
-export async function GET(
+export async function getClass(
     req: NextRequest,
-    { params }: { params: { id: string } }
+	{ params }: { params: { id: string } }
 ) {
     try {
         if (!Number(params.id)) {
@@ -18,39 +18,50 @@ export async function GET(
             error: "invalid id",
         });
     }
-    return Response.json({
-        msg: "success",
-        data: await prisma.exam.findMany({
+
+    try {
+        const classData = await prisma.class.findFirst({
             where: {
-                course: {
-                    some: {
-                        students: {
-                            some: {
-                                id: Number(params.id),
-                            },
-                        },
-                    },
-                },
+                id: Number(params.id),
             },
             select: {
                 id: true,
                 name: true,
-                description: true,
-                start: true,
-                end: true,
-                course: {
+                students: {
                     select: {
                         id: true,
                         name: true,
                     },
                 },
-                location: {
+                courses: {
                     select: {
                         id: true,
                         name: true,
+                    },
+                },
+                _count: {
+                    select: {
+                        students: true,
                     },
                 },
             },
-        }),
-    });
+        });
+
+        if (!classData) {
+            return Response.json({
+                msg: "error",
+                error: "class not found",
+            });
+        }
+
+        return Response.json({
+            msg: "success",
+            data: classData,
+        });
+    } catch (error) {
+        return Response.json({
+            msg: "error",
+            error: "internal server error",
+        });
+    }
 }

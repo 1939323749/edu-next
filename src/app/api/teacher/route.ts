@@ -8,6 +8,7 @@ export async function POST(req: NextRequest) {
 		sex: string;
 		title: string | undefined;
 		email: string;
+        department_name: string;
 	};
     try {
         data = await req.json();
@@ -23,6 +24,7 @@ export async function POST(req: NextRequest) {
             sex: z.string(),
             title: z.string().optional(),
             email: z.string(),
+            department_name: z.string(),
         }).parse(data);
         const teacher = await prisma.teacher.create({
             data: {
@@ -30,6 +32,20 @@ export async function POST(req: NextRequest) {
                 sex: data.sex,
                 title: data.title,
                 email: data.email,
+                department: {
+                    connect: {
+                        id: await prisma.department.findFirst({
+                            where: {
+                                name: data.department_name,
+                            },
+                        }).then(async(res) => res?.id?? await prisma.department.create({
+                            data: {
+                                name: data.department_name,
+                            },
+                        }).then((res) => res.id)
+                        ),
+                    },
+                },
             },
         })
         return Response.json({
@@ -60,7 +76,15 @@ export async function GET(req: NextRequest) {
                 name: true,
                 title: true,
                 email: true,
+                department: {
+                    select: {
+                        name: true,
+                    }
+                }
             },
+            orderBy:{
+                departmentId: "asc"
+            }
         })
     });
 }

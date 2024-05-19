@@ -26,7 +26,50 @@ export async function POST(req: NextRequest) {
             end: z.number(),
             day_of_week: z.number(),
         }).parse(data);
-        const tb = await prisma.timeBlock.create({
+
+        if (data.week_start > data.week_end) {
+            return NextResponse.json({
+                msg: "error",
+                error: "invalid week range",
+            });
+        }
+
+        if (data.start > data.end) {
+            return NextResponse.json({
+                msg: "error",
+                error: "invalid time range",
+            });
+        }
+
+        let tb = await prisma.timeBlock.findFirst({
+            where: {
+                week_end: {
+                    equals: data.week_start,
+                },
+                week_start: {
+                    equals: data.week_end,
+                },
+                day_of_week: {
+                    equals: data.day_of_week,
+                },
+                start: {
+                    equals: data.start,
+                },
+                end: {
+                    equals: data.end,
+                },
+            },
+        });
+
+        if (tb) {
+            return NextResponse.json({
+                msg: "error",
+                error: "time block already exists",
+            });
+        }
+
+
+        tb = await prisma.timeBlock.create({
             data: {
                 week_start: data.week_start,
                 week_end: data.week_end,
