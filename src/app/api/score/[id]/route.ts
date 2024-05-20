@@ -1,0 +1,1 @@
+export { importScore as POST } from './import_score'

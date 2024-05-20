@@ -1,3 +1,5 @@
+import { NextRequest } from "next/server";
+
 /**
  * @swagger
  * /api/ping:
@@ -8,10 +10,7 @@
  *    200:
  *      description: Success
  */
-export function GET(req: Request, res: Response){
-    setTimeout(() => {
-        
-    }, 1000);
+export function GET(req: NextRequest, res: Response){
     return Response.json({
         msg: "success",
         data: "pong",

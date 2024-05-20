@@ -51,6 +51,7 @@ export async function POST(req: NextRequest) {
         exam_date: string;
         start_time: string;
         end_time: string;
+        address: string;
     }
 
     try {
@@ -70,6 +71,7 @@ export async function POST(req: NextRequest) {
             exam_date: z.string(),
             start_time: z.string(),
             end_time: z.string(),
+            address: z.string(),
         }).parse(data);
 
         const exam = await prisma.exam.create({
@@ -81,6 +83,21 @@ export async function POST(req: NextRequest) {
                 course: {
                     connect: {
                         id: data.course_id,
+                    }
+                },
+                location: {
+                    connect: {
+                        id: await prisma.location.findFirst({
+                            where: {
+                                address: data.address,
+                            }
+                        }).then(async (res) => res?.id ?? await prisma.location.create({
+                            data: {
+                                name: data.address,
+                                address: data.address,
+                            }
+                        }).then((res) => res.id)
+                    )
                     }
                 }
             }

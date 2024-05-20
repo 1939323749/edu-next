@@ -1,0 +1,1 @@
+export { getClass as GET } from './get_class'

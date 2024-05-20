@@ -26,7 +26,7 @@ export async function addCourse(
         z.object({
             name: z.string(),
             description: z.string().optional(),
-            credit: z.number(),
+            credit: z.number().or(z.string()),
             department: z.string(),
             major: z.string().optional(),
         }).parse(data);
@@ -47,24 +47,11 @@ export async function addCourse(
             });
         }
 
-        const existed_major = await prisma.major.findFirst({
-            where: {
-                name: data.major,
-            },
-        });
-
-        if (data.major && !existed_major) {
-            return Response.json({
-                msg: "error",
-                error: "major not found",
-            });
-        }
-
         const course = await prisma.course.create({
             data: {
                 name: data.name,
                 description: data.description,
-                credit: data.credit,
+                credit: Number(data.credit),
                 department: {
                     connect: {
                         id: await prisma.department.findFirst({
@@ -81,7 +68,16 @@ export async function addCourse(
                 },
                 majors: {
                     connect: {
-                        id: existed_major?.id,
+                        id: await prisma.major.findFirst({
+                            where: {
+                                name: data.major,
+                            },
+                        }).then(async (res) => res?.id?? await prisma.major.create({
+                            data: {
+                                name: data.major?? "未知",
+                            },
+                        }).then((res) => res.id)
+                        ),
                     },
                 },
             },
@@ -103,6 +99,7 @@ export async function addCourse(
         return Response.json({
             msg: "error",
             error: "something went wrong",
+            detail: error,
         });
     }
 }
